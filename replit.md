@@ -2,7 +2,7 @@
 
 ## Overview
 
-This is a comprehensive Streamlit web application designed for short-term forecasting of gaseous air pollutants (O₃ and NO₂) using satellite and reanalysis data. The system provides an end-to-end solution for environmental monitoring and prediction, featuring data preprocessing, machine learning model training, and interactive visualization capabilities. The application supports multi-step workflows including data upload, preprocessing, model training with LSTM/GRU and Random Forest algorithms, and real-time forecasting with safety threshold monitoring.
+This is a Streamlit-based dashboard application for forecasting air pollutants (O₃ and NO₂) using satellite and reanalysis data. The application provides a complete machine learning pipeline including data upload, preprocessing, model training, and forecasting capabilities. It supports multiple forecasting models including Random Forest and deep learning models (LSTM/GRU when TensorFlow is available). The dashboard is designed for environmental scientists and researchers who need to predict short-term air pollution levels.
 
 ## User Preferences
 
@@ -11,66 +11,61 @@ Preferred communication style: Simple, everyday language.
 ## System Architecture
 
 ### Frontend Architecture
-- **Framework**: Streamlit with wide layout configuration
-- **Navigation**: Radio button-based page navigation system with four main sections
-- **State Management**: Session state management for data loading, model training, and prediction status
-- **Visualization**: Plotly-based interactive charts and graphs for time series analysis
-- **UI Components**: Modular design with separate pages for different workflow stages
+- **Framework**: Streamlit web application with multi-page navigation
+- **UI Components**: Interactive dashboard with sidebar navigation, file upload widgets, data visualization charts, and metric displays
+- **State Management**: Streamlit session state for maintaining application state across page interactions
+- **Visualization**: Plotly for interactive charts and graphs with custom color schemes and responsive layouts
 
 ### Backend Architecture
-- **Data Processing Pipeline**: Modular architecture with separate classes for each major function
-  - `DataHandler`: Manages CSV data loading and validation with flexible column naming
-  - `DataPreprocessor`: Handles missing values, feature engineering, and temporal resampling
-  - `PollutantForecaster`: Implements LSTM/GRU and Random Forest models for time series forecasting
-  - `Visualizer`: Creates interactive plots and visualizations using Plotly
+- **Modular Design**: Object-oriented architecture with separate classes for different responsibilities
+- **Core Components**:
+  - `DataHandler`: Manages data loading and validation from CSV files
+  - `DataPreprocessor`: Handles data cleaning, feature engineering, and train/test splitting
+  - `PollutantForecaster`: Implements machine learning models for forecasting
+  - `Visualizer`: Creates interactive plots and visualizations
+- **Caching Strategy**: Streamlit's `@st.cache_data` decorator for performance optimization of data loading and preprocessing operations
 
-### Machine Learning Components
-- **Time Series Models**: LSTM and GRU neural networks using TensorFlow/Keras
-- **Ensemble Models**: Random Forest regression using scikit-learn
-- **Hybrid Approach**: Combines deep learning temporal patterns with ensemble meteorological feature regression
-- **Feature Engineering**: Automated creation of lag variables, rolling averages, and seasonal indicators
-- **Model Evaluation**: RMSE, MAE, and R² metrics with baseline persistence model comparison
+### Data Processing Pipeline
+- **Input Validation**: Flexible column naming with required columns (datetime, o3, no2, temperature, wind_speed, humidity) and optional columns
+- **Preprocessing Features**:
+  - Multiple missing value handling methods (interpolation, forward fill, backward fill)
+  - Temporal resampling capabilities
+  - Lag feature creation for time series analysis
+  - Rolling window statistics generation
+  - Data scaling using StandardScaler or RobustScaler
+- **Train/Test Splitting**: Configurable split ratios with temporal ordering preservation
 
-### Data Processing Architecture
-- **Input Flexibility**: Supports CSV format with flexible column naming conventions
-- **Temporal Handling**: Automatic datetime parsing and resampling capabilities
-- **Missing Data**: Multiple strategies including interpolation and forward filling
-- **Scaling**: StandardScaler and RobustScaler options for feature normalization
-- **Sequence Creation**: Automatic time series sequence generation for LSTM/GRU models
+### Machine Learning Architecture
+- **Model Types**: 
+  - Random Forest Regressor (always available)
+  - LSTM/GRU neural networks (TensorFlow-dependent with graceful fallback)
+- **Target Variables**: Multi-target support for O₃ and NO₂ predictions
+- **Feature Engineering**: Automated creation of lag features, rolling averages, and temporal features
+- **Model Evaluation**: Comprehensive metrics including RMSE, MAE, and R² score
 
-### Safety and Monitoring
-- **Threshold Detection**: Configurable safety thresholds for pollutant concentrations
-- **Alert System**: Visual alerts when forecasted pollutants exceed safe limits
-- **Performance Caching**: Streamlit caching for improved data loading performance
+### Error Handling and Resilience
+- **Graceful Degradation**: TensorFlow dependency is optional with fallback to simpler models
+- **Input Validation**: Comprehensive data validation with user-friendly error messages
+- **Warning Suppression**: Strategic filtering of non-critical warnings for cleaner user experience
 
 ## External Dependencies
 
-### Core Python Libraries
-- **streamlit**: Web application framework for dashboard interface
-- **pandas**: Data manipulation and analysis
-- **numpy**: Numerical computing operations
-- **plotly.express** and **plotly.graph_objects**: Interactive visualization and charting
-- **xarray**: Multi-dimensional data handling for satellite/reanalysis data
+### Core Libraries
+- **Streamlit**: Web application framework for the dashboard interface
+- **Pandas**: Data manipulation and analysis
+- **NumPy**: Numerical computing and array operations
+- **Plotly**: Interactive data visualization (plotly.express and plotly.graph_objects)
+- **Scikit-learn**: Machine learning algorithms and preprocessing tools
 
-### Machine Learning Libraries
-- **tensorflow** and **tensorflow.keras**: Deep learning framework for LSTM/GRU models
-- **scikit-learn**: Machine learning algorithms including Random Forest and preprocessing tools
-- **sklearn.ensemble.RandomForestRegressor**: Tree-based ensemble learning
-- **sklearn.preprocessing**: Data scaling and normalization utilities
-- **sklearn.model_selection**: Train-test splitting functionality
-- **sklearn.metrics**: Model evaluation metrics (MSE, MAE, R²)
+### Optional Dependencies
+- **TensorFlow**: Deep learning framework for LSTM/GRU models (with graceful fallback if unavailable)
+- **XArray**: Multi-dimensional array processing for satellite data handling
 
-### Data Processing Libraries
-- **warnings**: Error and warning management
-- **datetime** and **timedelta**: Date and time handling utilities
-- **io.StringIO** and **io.BytesIO**: In-memory file handling for uploads
+### Data Format Support
+- **CSV Files**: Primary data input format with flexible column naming
+- **Time Series Data**: Supports various datetime formats and temporal resampling
 
-### Potential Data Sources
-- **Satellite Data**: Sentinel-5P/TROPOMI, MODIS for O₃ and NO₂ concentrations
-- **Reanalysis Data**: ERA5, MERRA-2 for meteorological variables
-- **Ground Monitoring**: Optional calibration data from air quality monitoring stations
-- **Meteorological Variables**: Temperature, wind speed, humidity, solar radiation, pressure
-
-### File Format Support
-- **CSV**: Primary data input format with flexible column structure
-- **NetCDF**: Potential future support for gridded satellite/reanalysis data through xarray
+### Export Capabilities
+- **CSV Export**: Prediction results export functionality
+- **JSON Export**: Alternative data export format
+- **Summary Reports**: Automated report generation for model performance
