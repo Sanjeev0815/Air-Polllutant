@@ -71,58 +71,75 @@ class Visualizer:
     
     def plot_processed_data(self, processed_data):
         """Visualize processed data with train/test split."""
-        fig = make_subplots(
-            rows=2, cols=1,
-            subplot_titles=('Training Data', 'Test Data'),
-            shared_xaxes=True
-        )
-        
-        # Training data
-        if 'y_train' in processed_data:
-            y_train = processed_data['y_train']
-            train_index = y_train.index
+        try:
+            fig = make_subplots(
+                rows=2, cols=1,
+                subplot_titles=('Training Data', 'Test Data'),
+                shared_xaxes=True
+            )
             
-            for i, col in enumerate(y_train.columns):
-                color = self.colors.get(col, f'hsl({i*60}, 70%, 50%)')
-                fig.add_trace(
-                    go.Scatter(
-                        x=train_index,
-                        y=y_train[col],
-                        mode='lines',
-                        name=f'{col.upper()} (Train)',
-                        line=dict(color=color, width=2)
-                    ),
-                    row=1, col=1
-                )
-        
-        # Test data
-        if 'y_test' in processed_data:
-            y_test = processed_data['y_test']
-            test_index = y_test.index
+            # Training data
+            if 'y_train' in processed_data and not processed_data['y_train'].empty:
+                y_train = processed_data['y_train']
+                train_index = y_train.index
+                
+                for i, col in enumerate(y_train.columns):
+                    color = self.colors.get(col, f'hsl({i*60}, 70%, 50%)')
+                    fig.add_trace(
+                        go.Scatter(
+                            x=train_index,
+                            y=y_train[col],
+                            mode='lines',
+                            name=f'{col.upper()} (Train)',
+                            line=dict(color=color, width=2)
+                        ),
+                        row=1, col=1
+                    )
             
-            for i, col in enumerate(y_test.columns):
-                color = self.colors.get(col, f'hsl({i*60}, 70%, 50%)')
-                fig.add_trace(
-                    go.Scatter(
-                        x=test_index,
-                        y=y_test[col],
-                        mode='lines',
-                        name=f'{col.upper()} (Test)',
-                        line=dict(color=color, width=2, dash='dash')
-                    ),
-                    row=2, col=1
-                )
-        
-        fig.update_layout(
-            title='Processed Data: Train/Test Split',
-            height=600,
-            showlegend=True
-        )
-        
-        fig.update_yaxes(title_text="Concentration (µg/m³)")
-        fig.update_xaxes(title_text="Date", row=2, col=1)
-        
-        return fig
+            # Test data
+            if 'y_test' in processed_data and not processed_data['y_test'].empty:
+                y_test = processed_data['y_test']
+                test_index = y_test.index
+                
+                for i, col in enumerate(y_test.columns):
+                    color = self.colors.get(col, f'hsl({i*60}, 70%, 50%)')
+                    fig.add_trace(
+                        go.Scatter(
+                            x=test_index,
+                            y=y_test[col],
+                            mode='lines',
+                            name=f'{col.upper()} (Test)',
+                            line=dict(color=color, width=2, dash='dash')
+                        ),
+                        row=2, col=1
+                    )
+            
+            fig.update_layout(
+                title='Processed Data: Train/Test Split',
+                height=600,
+                showlegend=True
+            )
+            
+            fig.update_yaxes(title_text="Concentration (µg/m³)")
+            fig.update_xaxes(title_text="Date", row=2, col=1)
+            
+            return fig
+            
+        except Exception as e:
+            # Return a simple error plot if something goes wrong
+            fig = go.Figure()
+            fig.add_annotation(
+                text=f"Error creating visualization: {str(e)}",
+                xref="paper", yref="paper",
+                x=0.5, y=0.5, xanchor='center', yanchor='middle',
+                showarrow=False,
+                font=dict(size=16, color="red")
+            )
+            fig.update_layout(
+                title='Processed Data Visualization Error',
+                height=400
+            )
+            return fig
     
     def plot_training_history(self, history, target):
         """Plot training history for neural network models."""

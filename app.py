@@ -148,7 +148,7 @@ def data_upload_page(data_handler, visualizer):
         if all(col in data.columns for col in ['o3', 'no2']):
             st.subheader("Pollutant Concentration Overview")
             fig = visualizer.plot_pollutant_overview(data)
-            st.plotly_chart(fig, width='stretch')
+            st.plotly_chart(fig, use_container_width=True)
 
 def preprocessing_page(preprocessor, visualizer):
     st.header("🔧 Data Preprocessing")
@@ -246,9 +246,8 @@ def preprocessing_page(preprocessor, visualizer):
                 
                 # Visualize processed data
                 st.subheader("Processed Data Visualization")
-                if 'datetime' in processed_data:
-                    fig = visualizer.plot_processed_data(processed_data)
-                    st.plotly_chart(fig, width='stretch')
+                fig = visualizer.plot_processed_data(processed_data)
+                st.plotly_chart(fig, use_container_width=True)
                 
             except Exception as e:
                 st.error(f"❌ Error during preprocessing: {str(e)}")
@@ -355,7 +354,7 @@ def model_training_page(forecaster, visualizer):
                     # Training history plot
                     if target in training_history:
                         fig = visualizer.plot_training_history(training_history[target], target)
-                        st.plotly_chart(fig, width='stretch')
+                        st.plotly_chart(fig, use_container_width=True)
                     
                     # Model comparison
                     target_data = forecaster.prepare_target_data(processed_data, target)
