@@ -23,7 +23,7 @@ class DataPreprocessor:
     def preprocess_data(self, data, missing_method='interpolate', resample_freq='1H',
                        create_lag_features=True, lag_periods=3,
                        create_rolling_features=True, rolling_window=6,
-                       train_split=0.8):
+                       train_split=0.8, use_advanced_features=True):
         """
         Complete preprocessing pipeline for air pollutant data.
         
@@ -63,7 +63,7 @@ class DataPreprocessor:
         
         # Step 3: Feature engineering
         df = self._create_features(df, create_lag_features, lag_periods,
-                                  create_rolling_features, rolling_window)
+                                  create_rolling_features, rolling_window, use_advanced_features)
         
         # Step 4: Remove any remaining NaN values (from lag/rolling features)
         df = df.dropna()
@@ -122,7 +122,7 @@ class DataPreprocessor:
         
         return df
     
-    def _create_features(self, df, create_lag, lag_periods, create_rolling, rolling_window):
+    def _create_features(self, df, create_lag, lag_periods, create_rolling, rolling_window, use_advanced_features=True):
         """Create engineered features."""
         
         # Ensure we have the required columns for feature engineering
@@ -154,12 +154,59 @@ class DataPreprocessor:
         df['month'] = df.index.month
         df['season'] = df.index.month.map(self._get_season)
         
-        # Create interaction features for meteorological variables
+        # Apply advanced features if enabled
+        if use_advanced_features:
+            df = self._create_advanced_features(df)
+        
+        return df
+    
+    def _create_advanced_features(self, df):
+        """Create advanced domain-specific features for air quality modeling."""
+        # Create advanced interaction features for meteorological variables
         if 'temperature' in df.columns and 'humidity' in df.columns:
             df['temp_humidity_interaction'] = df['temperature'] * df['humidity']
+            df['heat_index'] = df['temperature'] + 0.5 * (df['humidity'] - 10)  # Simplified heat index
         
         if 'wind_speed' in df.columns and 'temperature' in df.columns:
             df['wind_temp_interaction'] = df['wind_speed'] * df['temperature']
+            df['wind_chill_factor'] = df['temperature'] - 2 * df['wind_speed']  # Wind chill effect
+        
+        # Advanced domain-specific features for air quality
+        if 'solar_radiation' in df.columns and 'temperature' in df.columns:
+            df['photochemical_potential'] = df['solar_radiation'] * df['temperature'] / 100  # O3 formation potential
+        
+        if 'humidity' in df.columns and 'wind_speed' in df.columns:
+            df['atmospheric_stability'] = df['humidity'] / (df['wind_speed'] + 0.1)  # Stability indicator
+        
+        # Create pollutant interaction features if both are present
+        if 'o3' in df.columns and 'no2' in df.columns:
+            df['o3_no2_ratio'] = df['o3'] / (df['no2'] + 0.1)  # Pollutant ratio
+            df['total_oxidants'] = df['o3'] + 0.5 * df['no2']  # Combined oxidant load
+        
+        # Atmospheric pressure effects
+        if 'pressure' in df.columns:
+            df['pressure_deviation'] = df['pressure'] - df['pressure'].rolling(window=24, min_periods=1).mean()
+            if 'wind_speed' in df.columns:
+                df['pressure_wind_interaction'] = df['pressure_deviation'] * df['wind_speed']
+        
+        # Temperature gradient features
+        if 'temperature' in df.columns:
+            df['temp_gradient_1h'] = df['temperature'].diff(1)  # 1-hour temperature change
+            df['temp_gradient_6h'] = df['temperature'].diff(6)  # 6-hour temperature change
+            df['diurnal_temp_range'] = df['temperature'].rolling(window=24, min_periods=12).max() - df['temperature'].rolling(window=24, min_periods=12).min()
+        
+        # Wind direction features (if available)
+        if 'wind_direction' in df.columns:
+            df['wind_north_component'] = df['wind_speed'] * np.cos(np.radians(df['wind_direction']))
+            df['wind_east_component'] = df['wind_speed'] * np.sin(np.radians(df['wind_direction']))
+        
+        # Seasonal and temporal enhancement
+        df['hour_sin'] = np.sin(2 * np.pi * df['hour'] / 24)
+        df['hour_cos'] = np.cos(2 * np.pi * df['hour'] / 24)
+        df['day_sin'] = np.sin(2 * np.pi * df['day_of_week'] / 7)
+        df['day_cos'] = np.cos(2 * np.pi * df['day_of_week'] / 7)
+        df['month_sin'] = np.sin(2 * np.pi * df['month'] / 12)
+        df['month_cos'] = np.cos(2 * np.pi * df['month'] / 12)
         
         return df
     

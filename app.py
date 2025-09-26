@@ -177,6 +177,13 @@ def preprocessing_page(preprocessor, visualizer):
         
         create_rolling_features = st.checkbox("Create rolling averages", value=True)
         rolling_window = st.slider("Rolling window size", 2, 24, 6) if create_rolling_features else 0
+        
+        st.subheader("Advanced Features")
+        advanced_features = st.checkbox("Enable advanced domain-specific features", value=True, 
+                                       help="Includes interaction terms, atmospheric stability indicators, and photochemical potential")
+        
+        if advanced_features:
+            st.info("🧠 Advanced features include: heat index, wind chill, photochemical potential, atmospheric stability, pollutant ratios, and enhanced temporal encoding")
     
     with col2:
         st.subheader("Temporal Alignment")
@@ -202,7 +209,8 @@ def preprocessing_page(preprocessor, visualizer):
                     lag_periods=lag_periods,
                     create_rolling_features=create_rolling_features,
                     rolling_window=rolling_window,
-                    train_split=train_split
+                    train_split=train_split,
+                    use_advanced_features=advanced_features
                 )
                 
                 st.session_state.processed_data = processed_data
@@ -519,38 +527,41 @@ def display_forecast_results(predictions, baseline_predictions, targets, process
         st.subheader("📥 Export Forecast Data")
         col1, col2, col3 = st.columns(3)
         
+        # Generate export data once for all formats
+        export_csv = export_predictions_to_csv(predictions, targets)
+        export_json = export_predictions_to_json(predictions, targets)
+        export_summary = export_summary_report(predictions, targets, summary_df)
+        timestamp = pd.Timestamp.now().strftime('%Y%m%d_%H%M')
+        
         with col1:
-            # Export predictions as CSV
-            if st.button("📊 Download CSV Report"):
-                export_csv = export_predictions_to_csv(predictions, targets)
-                st.download_button(
-                    label="💾 Download Forecast CSV",
-                    data=export_csv,
-                    file_name=f"pollutant_forecast_{pd.Timestamp.now().strftime('%Y%m%d_%H%M')}.csv",
-                    mime="text/csv"
-                )
+            # Direct CSV download
+            st.download_button(
+                label="📊 Download CSV Report",
+                data=export_csv,
+                file_name=f"pollutant_forecast_{timestamp}.csv",
+                mime="text/csv",
+                help="Download forecast data as CSV file"
+            )
         
         with col2:
-            # Export predictions as JSON
-            if st.button("📋 Download JSON Report"):
-                export_json = export_predictions_to_json(predictions, targets)
-                st.download_button(
-                    label="💾 Download Forecast JSON",
-                    data=export_json,
-                    file_name=f"pollutant_forecast_{pd.Timestamp.now().strftime('%Y%m%d_%H%M')}.json",
-                    mime="application/json"
-                )
+            # Direct JSON download
+            st.download_button(
+                label="📋 Download JSON Report",
+                data=export_json,
+                file_name=f"pollutant_forecast_{timestamp}.json",
+                mime="application/json",
+                help="Download forecast data as JSON file"
+            )
         
         with col3:
-            # Export summary report
-            if st.button("📈 Download Summary Report"):
-                export_summary = export_summary_report(predictions, targets, summary_df)
-                st.download_button(
-                    label="💾 Download Summary PDF",
-                    data=export_summary,
-                    file_name=f"forecast_summary_{pd.Timestamp.now().strftime('%Y%m%d_%H%M')}.txt",
-                    mime="text/plain"
-                )
+            # Direct text summary download
+            st.download_button(
+                label="📈 Download Summary Report",
+                data=export_summary,
+                file_name=f"forecast_summary_{timestamp}.txt",
+                mime="text/plain",
+                help="Download formatted summary report"
+            )
 
 if __name__ == "__main__":
     main()
