@@ -24,7 +24,7 @@ class DataHandler:
                 content = uploaded_file.read()
                 if isinstance(content, bytes):
                     content = content.decode('utf-8')
-                data = pd.read_csv(StringIO(content))
+                data = load_and_validate_csv_data(content)
             else:
                 data = pd.read_csv(uploaded_file)
             

@@ -33,7 +33,7 @@ class PollutantForecaster:
         }
     
     def train_lstm_model(self, target_data, model_type='LSTM', units=64, num_layers=2,
-                        dropout_rate=0.2, epochs=50, batch_size=32):
+                        dropout_rate=0.2, epochs=20, batch_size=32):
         """
         Train LSTM or GRU model for time series forecasting.
         """

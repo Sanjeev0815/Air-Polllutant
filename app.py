@@ -11,7 +11,7 @@ from data_handler import DataHandler
 from preprocessor import DataPreprocessor
 from models import PollutantForecaster
 from visualizer import Visualizer
-from utils import load_css, calculate_metrics, check_safety_thresholds
+from utils import load_css, calculate_metrics, check_safety_thresholds, export_predictions_to_csv, export_predictions_to_json, export_summary_report
 
 # Page configuration
 st.set_page_config(
@@ -77,8 +77,14 @@ def data_upload_page(data_handler, visualizer):
                 else:
                     data = data_handler.load_netcdf_data(uploaded_file)
                 
-                st.session_state.raw_data = data
-                st.session_state.data_loaded = True
+                # Cache data in session state to avoid re-processing
+                if 'data_cache_key' not in st.session_state or st.session_state.data_cache_key != uploaded_file.name:
+                    st.session_state.raw_data = data
+                    st.session_state.data_cache_key = uploaded_file.name
+                    st.session_state.data_loaded = True
+                else:
+                    # Data already cached
+                    pass
                 st.success(f"✅ Data loaded successfully! Shape: {data.shape}")
                 
             except Exception as e:
@@ -508,6 +514,43 @@ def display_forecast_results(predictions, baseline_predictions, targets, process
     if summary_data:
         summary_df = pd.DataFrame(summary_data)
         st.dataframe(summary_df, width='stretch')
+        
+        # Data Export Section
+        st.subheader("📥 Export Forecast Data")
+        col1, col2, col3 = st.columns(3)
+        
+        with col1:
+            # Export predictions as CSV
+            if st.button("📊 Download CSV Report"):
+                export_csv = export_predictions_to_csv(predictions, targets)
+                st.download_button(
+                    label="💾 Download Forecast CSV",
+                    data=export_csv,
+                    file_name=f"pollutant_forecast_{pd.Timestamp.now().strftime('%Y%m%d_%H%M')}.csv",
+                    mime="text/csv"
+                )
+        
+        with col2:
+            # Export predictions as JSON
+            if st.button("📋 Download JSON Report"):
+                export_json = export_predictions_to_json(predictions, targets)
+                st.download_button(
+                    label="💾 Download Forecast JSON",
+                    data=export_json,
+                    file_name=f"pollutant_forecast_{pd.Timestamp.now().strftime('%Y%m%d_%H%M')}.json",
+                    mime="application/json"
+                )
+        
+        with col3:
+            # Export summary report
+            if st.button("📈 Download Summary Report"):
+                export_summary = export_summary_report(predictions, targets, summary_df)
+                st.download_button(
+                    label="💾 Download Summary PDF",
+                    data=export_summary,
+                    file_name=f"forecast_summary_{pd.Timestamp.now().strftime('%Y%m%d_%H%M')}.txt",
+                    mime="text/plain"
+                )
 
 if __name__ == "__main__":
     main()

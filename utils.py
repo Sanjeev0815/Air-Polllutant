@@ -206,23 +206,121 @@ def create_alerts_summary(predictions, safety_thresholds):
     
     return alerts
 
-def export_predictions_to_csv(predictions, filename='predictions.csv'):
-    """Export prediction results to CSV file."""
+def export_predictions_to_csv(predictions, targets):
+    """Export prediction results to CSV format."""
     export_data = []
     
-    for target, pred_data in predictions.items():
-        if 'future_predictions' in pred_data:
-            for i, pred in enumerate(pred_data['future_predictions']):
-                export_data.append({
-                    'pollutant': target,
-                    'forecast_day': i + 1,
-                    'predicted_concentration': pred,
-                    'timestamp': pd.Timestamp.now() + pd.Timedelta(days=i)
-                })
+    for target in targets:
+        if target in predictions:
+            pred_data = predictions[target]
+            
+            # Historical data
+            if 'actual' in pred_data and 'predicted' in pred_data:
+                actual_values = pred_data['actual'] 
+                predicted_values = pred_data['predicted']
+                min_len = min(len(actual_values), len(predicted_values))
+                
+                for i in range(min_len):
+                    export_data.append({
+                        'pollutant': target.upper(),
+                        'data_type': 'historical',
+                        'day': i + 1,
+                        'actual_concentration': actual_values[i],
+                        'predicted_concentration': predicted_values[i],
+                        'timestamp': pd.Timestamp.now() - pd.Timedelta(days=min_len-i)
+                    })
+            
+            # Future predictions
+            if 'future_predictions' in pred_data:
+                for i, pred in enumerate(pred_data['future_predictions']):
+                    export_data.append({
+                        'pollutant': target.upper(),
+                        'data_type': 'forecast',
+                        'day': i + 1,
+                        'actual_concentration': None,
+                        'predicted_concentration': pred,
+                        'timestamp': pd.Timestamp.now() + pd.Timedelta(days=i+1)
+                    })
     
     if export_data:
         df = pd.DataFrame(export_data)
-        df.to_csv(filename, index=False)
-        return True
+        return df.to_csv(index=False)
     
-    return False
+    return ""
+
+def export_predictions_to_json(predictions, targets):
+    """Export prediction results to JSON format."""
+    export_dict = {
+        'export_timestamp': pd.Timestamp.now().isoformat(),
+        'forecast_results': {}
+    }
+    
+    for target in targets:
+        if target in predictions:
+            pred_data = predictions[target]
+            export_dict['forecast_results'][target] = {
+                'historical_actual': pred_data.get('actual', []),
+                'historical_predicted': pred_data.get('predicted', []),
+                'future_predictions': pred_data.get('future_predictions', []),
+                'metrics': calculate_metrics(
+                    pred_data.get('actual', []), 
+                    pred_data.get('predicted', [])
+                ) if 'actual' in pred_data and 'predicted' in pred_data else {}
+            }
+    
+    import json
+    return json.dumps(export_dict, indent=2, default=str)
+
+def export_summary_report(predictions, targets, summary_df):
+    """Export a text summary report."""
+    report_lines = [
+        "AIR POLLUTANT FORECAST SUMMARY REPORT",
+        "=" * 50,
+        f"Generated: {pd.Timestamp.now().strftime('%Y-%m-%d %H:%M:%S')}",
+        "",
+        "FORECAST OVERVIEW:",
+        "-" * 20
+    ]
+    
+    # Add summary table
+    if not summary_df.empty:
+        report_lines.append("Pollutant Summary:")
+        report_lines.append(summary_df.to_string(index=False))
+        report_lines.append("")
+    
+    # Add detailed predictions
+    for target in targets:
+        if target in predictions:
+            pred_data = predictions[target]
+            report_lines.extend([
+                f"{target.upper()} DETAILED FORECAST:",
+                "-" * 30
+            ])
+            
+            if 'future_predictions' in pred_data:
+                for i, pred in enumerate(pred_data['future_predictions']):
+                    report_lines.append(f"Day {i+1}: {pred:.2f} µg/m³")
+            
+            if 'actual' in pred_data and 'predicted' in pred_data:
+                metrics = calculate_metrics(pred_data['actual'], pred_data['predicted'])
+                report_lines.extend([
+                    "",
+                    "Model Performance:",
+                    f"  RMSE: {metrics['rmse']:.2f}",
+                    f"  MAE: {metrics['mae']:.2f}",
+                    f"  R²: {metrics['r2']:.3f}"
+                ])
+            
+            report_lines.append("")
+    
+    report_lines.extend([
+        "SAFETY THRESHOLDS:",
+        "-" * 20,
+        "O3: 100 µg/m³ (WHO guideline)",
+        "NO2: 40 µg/m³ (WHO guideline)",
+        "",
+        "Note: This forecast is for research purposes.",
+        "Consult official sources for public health decisions."
+    ])
+    
+    return "\n".join(report_lines)

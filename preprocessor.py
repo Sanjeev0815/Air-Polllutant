@@ -2,8 +2,15 @@ import pandas as pd
 import numpy as np
 from sklearn.preprocessing import StandardScaler, RobustScaler
 from sklearn.model_selection import train_test_split
+import streamlit as st
 import warnings
 warnings.filterwarnings('ignore')
+
+@st.cache_data
+def cached_preprocess_data(data_hash, missing_method, resample_freq, create_lag_features, lag_periods, create_rolling_features, rolling_window, train_split):
+    """Cached preprocessing function for better performance."""
+    preprocessor = DataPreprocessor()
+    return preprocessor._process_data_internal(data_hash, missing_method, resample_freq, create_lag_features, lag_periods, create_rolling_features, rolling_window, train_split)
 
 class DataPreprocessor:
     """Handles data preprocessing for air pollutant forecasting models."""
