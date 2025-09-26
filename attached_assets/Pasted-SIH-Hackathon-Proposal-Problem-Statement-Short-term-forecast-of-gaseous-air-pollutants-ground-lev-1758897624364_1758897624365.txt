@@ -1,0 +1,102 @@
+SIH Hackathon Proposal
+
+Problem Statement:
+Short-term forecast of gaseous air pollutants (ground-level O₃ and NO₂) using satellite and reanalysis data.
+
+Proposed Solution
+
+Develop an AI/ML-based predictive system to forecast short-term concentrations of O₃ and NO₂. The system will leverage satellite data, reanalysis meteorological variables, and historical pollutant measurements to provide accurate forecasts for 1–3 days ahead.
+
+Key Components:
+
+Data Collection:
+
+Satellite-derived O₃ and NO₂ concentrations (Sentinel-5P/TROPOMI, MODIS).
+
+Meteorological variables from reanalysis datasets (ERA5, MERRA-2): wind speed, temperature, humidity, solar radiation, etc.
+
+Optional: Ground monitoring data for calibration.
+
+Data Preprocessing:
+
+Handle missing values and outliers.
+
+Align spatial-temporal resolutions (resample, interpolate).
+
+Feature engineering:
+
+Lag variables of pollutants.
+
+Moving averages and seasonal indicators.
+
+Meteorological interaction features.
+
+Modeling Approach:
+
+LSTM/GRU: Capture temporal patterns in pollutant concentrations.
+
+Random Forest/XGBoost: Use meteorological features for regression.
+
+Hybrid Model: Combine LSTM for time series + Random Forest for exogenous features.
+
+Prediction & Evaluation:
+
+Forecast pollutant levels 1–3 days ahead.
+
+Metrics: RMSE, MAE, R².
+
+Baseline comparison: persistence model (assume pollutant remains constant).
+
+Visualization & Dashboard:
+
+Interactive plots of predicted vs actual values.
+
+Spatial heatmaps for gridded data.
+
+Alerts for high pollution days.
+
+Implement dashboard using Streamlit for hackathon demo.
+
+Innovation & Uniqueness
+
+Combines satellite remote sensing, reanalysis data, and AI for fine-scale forecasting.
+
+Hybrid ML model captures both temporal dynamics and meteorological influences.
+
+Provides real-time actionable insights for citizens and policymakers.
+
+Technologies
+
+Data Handling: Python, Pandas, NumPy, xarray
+
+ML/Deep Learning: TensorFlow / PyTorch, Scikit-learn
+
+Satellite & Reanalysis APIs: Google Earth Engine, Copernicus Open Access Hub, NASA Earthdata
+
+Visualization: Plotly, Folium, Streamlit
+
+Methodology
+
+Collect 1–2 years of satellite & reanalysis data for the selected city/region.
+
+Preprocess data: handle missing values, align grids and timestamps.
+
+Engineer features for ML models.
+
+Train LSTM for time-series trends; train Random Forest for meteorological predictors.
+
+Combine predictions in hybrid ensemble.
+
+Evaluate using RMSE/MAE/R²; compare with baseline.
+
+Visualize outputs in an interactive dashboard with maps and time-series charts.
+
+Feasibility
+
+Hackathon-friendly: focus on one city/region.
+
+Limit forecast horizon to 1–3 days.
+
+Use 1–2 years of historical data to train models.
+
+Can generate a demo dashboard within a short timeframe.

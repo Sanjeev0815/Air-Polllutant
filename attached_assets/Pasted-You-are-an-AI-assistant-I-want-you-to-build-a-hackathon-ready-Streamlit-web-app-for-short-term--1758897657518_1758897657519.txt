@@ -1,0 +1,49 @@
+You are an AI assistant. I want you to build a **hackathon-ready Streamlit web app** for short-term forecasting of gaseous air pollutants (O3 and NO2) using satellite and reanalysis data.  
+
+The app should have the following features:
+
+---
+
+## Core Requirements:
+
+1. **Data Handling**
+   - Load historical satellite and reanalysis data (CSV or NetCDF format) for a selected city/region.
+   - Support meteorological variables: temperature, wind speed, humidity, solar radiation.
+   - Include historical pollutant levels (O3 and NO2) if available.
+
+2. **Preprocessing**
+   - Handle missing values and noisy measurements.
+   - Align spatial and temporal resolutions (resample or interpolate if needed).
+   - Create lag variables, rolling averages, and seasonal indicators as features.
+
+3. **Machine Learning / Forecasting**
+   - Implement LSTM or GRU for time-series pollutant forecasting.
+   - Optionally, include Random Forest/XGBoost for meteorological feature regression.
+   - Combine models in a hybrid approach (LSTM + RF/XGBoost) to improve prediction accuracy.
+
+4. **Prediction**
+   - Forecast O3 and NO2 levels for the next 1–3 days.
+   - Evaluate models using RMSE, MAE, and R².
+   - Compare predictions with a baseline model (persistence forecast).
+
+5. **Dashboard / Visualization**
+   - Interactive plots: time-series of predicted vs actual pollutant levels.
+   - Optional: Heatmaps for spatial distribution if using gridded data.
+   - Show alerts if forecasted pollutants exceed safe limits.
+   - Build the UI using **Streamlit** with clear sections for data upload, model training, and forecast visualization.
+
+6. **Technologies / Libraries**
+   - Python, Pandas, NumPy, xarray for data.
+   - TensorFlow or PyTorch for LSTM/GRU.
+   - Scikit-learn for Random Forest/XGBoost.
+   - Plotly, Folium for visualization.
+   - Streamlit for dashboard.
+
+7. **Deliverables**
+   - A working `app.py` file that can run on Replit or locally with `streamlit run app.py`.
+   - Modular design: separate functions for data loading, preprocessing, modeling, prediction, and visualization.
+   - Include comments explaining each part of the code.
+
+---
+
+⚡ Generate the **full Python Streamlit code** that fulfills all the requirements, including example placeholders for datasets. The code should be ready to run and showcase a **demo forecast dashboard** for O3 and NO2.
