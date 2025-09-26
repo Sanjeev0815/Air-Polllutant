@@ -149,7 +149,7 @@ class Visualizer:
             shared_xaxes=True
         )
         
-        epochs = range(1, len(history.history['loss']) + 1)
+        epochs = list(range(1, len(history.history['loss']) + 1))
         
         # Loss plot
         fig.add_trace(
