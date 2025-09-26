@@ -32,7 +32,7 @@ class PollutantForecaster:
             'feature_names': processed_data['feature_names']
         }
     
-    def train_lstm_model(self, target_data, model_type='LSTM', units=64, layers=2,
+    def train_lstm_model(self, target_data, model_type='LSTM', units=64, num_layers=2,
                         dropout_rate=0.2, epochs=50, batch_size=32):
         """
         Train LSTM or GRU model for time series forecasting.
@@ -55,24 +55,24 @@ class PollutantForecaster:
         if model_type.upper() == 'LSTM':
             model.add(layers.LSTM(
                 units,
-                return_sequences=(layers > 1),
+                return_sequences=(num_layers > 1),
                 input_shape=(X_train_seq.shape[1], X_train_seq.shape[2])
             ))
         else:  # GRU
             model.add(layers.GRU(
                 units,
-                return_sequences=(layers > 1),
+                return_sequences=(num_layers > 1),
                 input_shape=(X_train_seq.shape[1], X_train_seq.shape[2])
             ))
         
         model.add(layers.Dropout(dropout_rate))
         
         # Additional layers
-        for i in range(1, layers):
+        for i in range(1, num_layers):
             if model_type.upper() == 'LSTM':
-                model.add(layers.LSTM(units, return_sequences=(i < layers - 1)))
+                model.add(layers.LSTM(units, return_sequences=(i < num_layers - 1)))
             else:
-                model.add(layers.GRU(units, return_sequences=(i < layers - 1)))
+                model.add(layers.GRU(units, return_sequences=(i < num_layers - 1)))
             model.add(layers.Dropout(dropout_rate))
         
         # Output layer

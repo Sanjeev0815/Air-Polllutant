@@ -300,7 +300,7 @@ def model_training_page(forecaster, visualizer):
                         target_data,
                         model_type=model_type,
                         units=lstm_units,
-                        layers=lstm_layers,
+                        num_layers=lstm_layers,
                         dropout_rate=dropout_rate,
                         epochs=epochs,
                         batch_size=batch_size
