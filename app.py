@@ -126,7 +126,7 @@ def data_upload_page(data_handler, visualizer):
         
         # Data sample
         st.subheader("Data Sample")
-        st.dataframe(data.head(10), use_container_width=True)
+        st.dataframe(data.head(10), width='stretch')
         
         # Data quality check
         st.subheader("Data Quality Check")
@@ -142,7 +142,7 @@ def data_upload_page(data_handler, visualizer):
         if all(col in data.columns for col in ['o3', 'no2']):
             st.subheader("Pollutant Concentration Overview")
             fig = visualizer.plot_pollutant_overview(data)
-            st.plotly_chart(fig, use_container_width=True)
+            st.plotly_chart(fig, width='stretch')
 
 def preprocessing_page(preprocessor, visualizer):
     st.header("🔧 Data Preprocessing")
@@ -228,13 +228,13 @@ def preprocessing_page(preprocessor, visualizer):
                     'Type': ['Original' if not any(x in feat for x in ['lag', 'rolling']) 
                             else 'Engineered' for feat in processed_data['feature_names']]
                 })
-                st.dataframe(feature_df, use_container_width=True)
+                st.dataframe(feature_df, width='stretch')
                 
                 # Visualize processed data
                 st.subheader("Processed Data Visualization")
                 if 'datetime' in processed_data:
                     fig = visualizer.plot_processed_data(processed_data)
-                    st.plotly_chart(fig, use_container_width=True)
+                    st.plotly_chart(fig, width='stretch')
                 
             except Exception as e:
                 st.error(f"❌ Error during preprocessing: {str(e)}")
@@ -266,7 +266,7 @@ def model_training_page(forecaster, visualizer):
         max_depth = st.slider("Max Depth", 5, 30, 10)
         
         st.subheader("Training Configuration")
-        epochs = st.slider("Epochs", 10, 100, 50)
+        epochs = st.slider("Epochs", 5, 50, 20)
         batch_size = st.selectbox("Batch Size", [16, 32, 64, 128], index=1)
     
     # Target selection
@@ -341,14 +341,14 @@ def model_training_page(forecaster, visualizer):
                     # Training history plot
                     if target in training_history:
                         fig = visualizer.plot_training_history(training_history[target], target)
-                        st.plotly_chart(fig, use_container_width=True)
+                        st.plotly_chart(fig, width='stretch')
                     
                     # Model comparison
                     target_data = forecaster.prepare_target_data(processed_data, target)
                     model_comparison = forecaster.evaluate_models(models[target], target_data)
                     
                     comparison_df = pd.DataFrame(model_comparison).T
-                    st.dataframe(comparison_df, use_container_width=True)
+                    st.dataframe(comparison_df, width='stretch')
                 
             except Exception as e:
                 st.error(f"❌ Error during training: {str(e)}")
@@ -455,7 +455,7 @@ def display_forecast_results(predictions, baseline_predictions, targets, process
             baseline_predictions[target] if baseline_predictions else None,
             safety_thresholds.get(target, None)
         )
-        st.plotly_chart(fig, use_container_width=True)
+        st.plotly_chart(fig, width='stretch')
         
         # Model evaluation metrics
         col1, col2, col3 = st.columns(3)
@@ -507,7 +507,7 @@ def display_forecast_results(predictions, baseline_predictions, targets, process
     
     if summary_data:
         summary_df = pd.DataFrame(summary_data)
-        st.dataframe(summary_df, use_container_width=True)
+        st.dataframe(summary_df, width='stretch')
 
 if __name__ == "__main__":
     main()

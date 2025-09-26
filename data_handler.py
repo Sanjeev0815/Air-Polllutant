@@ -4,6 +4,11 @@ import xarray as xr
 import streamlit as st
 from io import StringIO, BytesIO
 
+@st.cache_data
+def load_and_validate_csv_data(file_content):
+    """Cached CSV loading for better performance."""
+    return pd.read_csv(StringIO(file_content))
+
 class DataHandler:
     """Handles data loading and basic quality checks for air pollutant forecasting."""
     
