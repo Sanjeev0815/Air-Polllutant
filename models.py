@@ -1,11 +1,21 @@
 import numpy as np
 import pandas as pd
-from tensorflow import keras
-from tensorflow.keras import layers
 from sklearn.ensemble import RandomForestRegressor
 from sklearn.metrics import mean_squared_error, mean_absolute_error, r2_score
 import warnings
 warnings.filterwarnings('ignore')
+
+# TensorFlow imports with fallback
+try:
+    import tensorflow as tf
+    from tensorflow import keras
+    from tensorflow.keras import layers
+    TENSORFLOW_AVAILABLE = True
+except ImportError:
+    TENSORFLOW_AVAILABLE = False
+    keras = None
+    layers = None
+    print("TensorFlow not available. LSTM/GRU models will not be functional.")
 
 class PollutantForecaster:
     """Main class for training and using air pollutant forecasting models."""
@@ -37,6 +47,9 @@ class PollutantForecaster:
         """
         Train LSTM or GRU model for time series forecasting.
         """
+        if not TENSORFLOW_AVAILABLE:
+            raise RuntimeError("TensorFlow is not available. Cannot train LSTM/GRU models.")
+            
         # Prepare sequence data
         X_train_seq, y_train_seq = self._create_sequences(
             target_data['X_train'], target_data['y_train']

@@ -9,8 +9,8 @@ warnings.filterwarnings('ignore')
 @st.cache_data
 def cached_preprocess_data(data_hash, missing_method, resample_freq, create_lag_features, lag_periods, create_rolling_features, rolling_window, train_split):
     """Cached preprocessing function for better performance."""
-    preprocessor = DataPreprocessor()
-    return preprocessor._process_data_internal(data_hash, missing_method, resample_freq, create_lag_features, lag_periods, create_rolling_features, rolling_window, train_split)
+    # This function is currently not used but kept for future caching optimization
+    pass
 
 class DataPreprocessor:
     """Handles data preprocessing for air pollutant forecasting models."""
