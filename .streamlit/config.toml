@@ -1,4 +1,0 @@
-[server]
-headless = false
-address = "localhost"
-port = 8501
